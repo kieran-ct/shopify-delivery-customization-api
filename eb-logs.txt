@@ -1,0 +1,4 @@
+Retrieving logs...
+Logs were saved to /Users/kieranclinton-tarestad/Documents/Code/shopify-delivery-customization-api/.elasticbeanstalk/logs/250524_213811
+Logs were saved to /Users/kieranclinton-tarestad/Documents/Code/shopify-delivery-customization-api/.elasticbeanstalk/logs/250524_213811
+Updated symlink at /Users/kieranclinton-tarestad/Documents/Code/shopify-delivery-customization-api/.elasticbeanstalk/logs/latest
