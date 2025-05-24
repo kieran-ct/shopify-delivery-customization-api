@@ -24,9 +24,9 @@ scopes = "write_delivery_customizations"
 
 [auth]
 redirect_urls = [
-  "https://treated-prostate-contest-terry.trycloudflare.com/auth/callback",
-  "https://treated-prostate-contest-terry.trycloudflare.com/auth/shopify/callback",
-  "https://treated-prostate-contest-terry.trycloudflare.com/api/auth/callback"
+  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/auth/callback",
+  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/auth/shopify/callback",
+  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/api/auth/callback"
 ]
 
 [pos]
