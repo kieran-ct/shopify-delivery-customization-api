@@ -11,7 +11,7 @@ COPY package*.json ./
 COPY package-lock.json ./
 
 # 4) Install all dependencies, ignoring peer-dep errors
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # 5) Copy source
 COPY . .
