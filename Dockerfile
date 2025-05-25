@@ -1,23 +1,27 @@
 # Dockerfile
 
+# 1) Use a Node.js image that includes build tools
 FROM node:18-bullseye-slim
+
+# 2) Set working directory
 WORKDIR /app
 
-# Copy package files and lockfile
+# 3) Copy package manifests and lockfile
 COPY package*.json ./
 COPY package-lock.json ./
 
-# Install exactly what's in the lockfile
+# 4) Install exact dependencies
 RUN npm ci
 
-# Copy the rest of the source
+# 5) Copy the rest of your application code
 COPY . .
 
-# Build the Remix app
+# 6) Build your Remix app (and strip import assertions)
 RUN node scripts/strip-import-assertions.js && npm run build
 
-# Bind to the EB port
+# 7) Expose the port Elastic Beanstalk forwards to (8080)
 ENV PORT=8080
 EXPOSE 8080
 
+# 8) Start your Express/Remix server
 CMD ["npm", "start"]
