@@ -24,9 +24,9 @@ scopes = "write_delivery_customizations"
 
 [auth]
 redirect_urls = [
-  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/auth/callback",
-  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/auth/shopify/callback",
-  "https://shopify-prod.eba-mp827nvq.eu-north-1.elasticbeanstalk.com/api/auth/callback"
+  "https://shopify-docker.sunsetxfriends.com/api/auth/callback",
+  "https://shopify-docker.sunsetxfriends.com/auth/callback",
+  "https://shopify-docker.sunsetxfriends.com/auth/shopify/callback",
 ]
 
 [pos]
