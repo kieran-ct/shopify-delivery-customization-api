@@ -1,19 +1,24 @@
 # Dockerfile
 
-FROM node:18-alpine
+# Use Debian‐slim so npm install works without extra build-tool setup
+FROM node:18-bullseye-slim
+
+# Create app directory
 WORKDIR /app
 
+# Install only production dependencies; build tooling already present in this image
 COPY package*.json ./
 RUN npm install --production
 
+# Copy the rest of your source
 COPY . .
 
-# Build your Remix app
+# Strip import assertions and build your Remix app
 RUN node scripts/strip-import-assertions.js && npm run build
 
-# Let EB know we listen on 8080
+# Tell Elastic Beanstalk which port to bind; server.js uses process.env.PORT
 ENV PORT=8080
 EXPOSE 8080
 
-# Start the app; server.js reads process.env.PORT
+# Start your server
 CMD ["npm", "start"]
