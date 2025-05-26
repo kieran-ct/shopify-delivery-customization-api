@@ -16,14 +16,14 @@ export default defineConfig({
       },
     },
 
-    // 2) Copy Polaris CSS into the build directory
+    // 2) Copy Polaris CSS into the public build directory
     viteStaticCopy({
       targets: [
         {
           src: 'node_modules/@shopify/polaris/build/esm/styles.css',
-          dest: 'build'
-        }
-      ]
+          dest: 'public/build',
+        },
+      ],
     }),
 
     // 3) Official Remix Vite plugin
@@ -35,13 +35,13 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      // Redirect CSS?url import to copied file in build
-      '@shopify/polaris/build/esm/styles.css?url': '/build/styles.css'
-    }
+      // Redirect CSS?url imports to the copied CSS file
+      '@shopify/polaris/build/esm/styles.css?url': '/build/styles.css',
+    },
   },
 
   build: {
     target: "es2020",
-    sourcemap: true
-  }
+    sourcemap: true,
+  },
 });
