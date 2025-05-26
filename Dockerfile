@@ -1,27 +1,43 @@
-# Dockerfile
+# Multi-stage Dockerfile for building and running the Shopify Remix app with Prisma
 
-# 1) Base image with build tools
-FROM node:18-bullseye-slim
-
-# 2) Set working directory
+# Stage 1: install dependencies and generate Prisma client, build app
+FROM node:18-bullseye-slim AS builder
 WORKDIR /app
 
-# 3) Copy manifests
+# Copy package manifests and lockfile
 COPY package*.json ./
-COPY package-lock.json ./
 
-# 4) Install all dependencies, ignoring peer-dep errors
-RUN npm ci
+# Install all dependencies (including dev)
+RUN npm install
 
-# 5) Copy source
+# Copy Prisma schema and generate client
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Copy the rest of the source
 COPY . .
 
-# 6) Build the Remix app
+# Build the Remix app (strip import assertions and run Remix build)
 RUN node scripts/strip-import-assertions.js && npm run build
 
-# 7) Listen on the EB port
+# Stage 2: production image
+FROM node:18-bullseye-slim
+WORKDIR /app
+
+# Copy only production modules and generated Prisma client
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy built app and public assets
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
+
+# Copy server and package.json for start
+COPY --from=builder /app/server.js ./server.js
+COPY --from=builder /app/package.json ./package.json
+
+# Bind to the EB port
 ENV PORT=8080
 EXPOSE 8080
 
-# 8) Start the server
+# Start the app
 CMD ["npm", "start"]
