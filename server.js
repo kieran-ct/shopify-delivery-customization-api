@@ -24,6 +24,7 @@ Module.prototype.require = function (id) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Directories
 const BUILD_DIR = path.join(process.cwd(), "build");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
@@ -31,16 +32,16 @@ const app = express();
 app.use(compression());
 app.use(morgan("tiny"));
 
-// Serve Remix static assets under /build
+// 1) Serve Remix build assets (JS/CSS/images) under /build
 app.use(
   "/build",
-  express.static(path.join(PUBLIC_DIR, "build"), {
+  express.static(BUILD_DIR, {
     immutable: true,
     maxAge: "1y",
   })
 );
 
-// Serve other public files
+// 2) Serve static public files (e.g. copied Polaris CSS) at root
 app.use(express.static(PUBLIC_DIR));
 
 // Helper to dynamically import the correct build file
@@ -51,7 +52,7 @@ async function loadBuild() {
   return buildModule.default ?? buildModule;
 }
 
-// All other routes go to Remix
+// 3) All other routes go to Remix
 app.all("*", async (req, res, next) => {
   try {
     const build = await loadBuild();
