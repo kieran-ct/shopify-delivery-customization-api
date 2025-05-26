@@ -17,7 +17,6 @@ const BUILD_DIR = path.join(process.cwd(), "build");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
 const app = express();
-
 app.use(compression());
 app.use(morgan("tiny"));
 
@@ -33,14 +32,18 @@ app.use(
 // 2) Serve other public files
 app.use(express.static(PUBLIC_DIR));
 
-// 3) All other routes go to Remix, loading the build dynamically
+// Helper to dynamically import the correct build file
+async function loadBuild() {
+  const buildFile = path.join(BUILD_DIR, "index.cjs");
+  const buildUrl = pathToFileURL(buildFile).href;
+  const buildModule = await import(buildUrl);
+  return buildModule.default ?? buildModule;
+}
+
+// 3) All other routes go to Remix
 app.all("*", async (req, res, next) => {
   try {
-    // Dynamic ESM import of the compiled Remix build
-    const buildUrl = pathToFileURL(path.join(BUILD_DIR, "index.js")).href;
-    const buildModule = await import(buildUrl);
-    const build = buildModule.default ?? buildModule;
-
+    const build = await loadBuild();
     return createRequestHandler({
       build,
       getLoadContext() {
