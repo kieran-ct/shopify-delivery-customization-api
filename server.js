@@ -1,8 +1,6 @@
 // server.js
-import Module from 'module';
 import express from "express";
 import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
 import compression from "compression";
 import morgan from "morgan";
 import { createRequestHandler } from "@remix-run/express";
@@ -10,62 +8,39 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Patch require to handle Polaris CSS import
-const originalRequire = Module.prototype.require;
-Module.prototype.require = function (id) {
-  if (id === '@shopify/polaris/build/esm/styles.css?url') {
-    // Return the public URL for the copied CSS file
-    return '/build/styles.css';
-  }
-  return originalRequire.call(this, id);
-};
-
-// Resolve __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Directories
+// Define the directories for the build and public assets
 const BUILD_DIR = path.join(process.cwd(), "build");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
+
+// Load the Remix build using CommonJS require
+const build = require(path.join(BUILD_DIR, "index"));
 
 const app = express();
 app.use(compression());
 app.use(morgan("tiny"));
 
-// 1) Serve Remix build assets (JS/CSS/images) under /build
+// Serve Remix static assets (JS/CSS/images) under /build
 app.use(
   "/build",
-  express.static(BUILD_DIR, {
+  express.static(path.join(PUBLIC_DIR, "build"), {
     immutable: true,
     maxAge: "1y",
   })
 );
 
-// 2) Serve static public files (e.g. copied Polaris CSS) at root
-app.use(express.static(PUBLIC_DIR));
+// Serve other public files (no index fallback)
+app.use(express.static(PUBLIC_DIR, { index: false }));
 
-// Helper to dynamically import the correct build file
-async function loadBuild() {
-  const buildFile = path.join(BUILD_DIR, "index.cjs");
-  const buildUrl = pathToFileURL(buildFile).href;
-  const buildModule = await import(buildUrl);
-  return buildModule.default ?? buildModule;
-}
-
-// 3) All other routes go to Remix
-app.all("*", async (req, res, next) => {
-  try {
-    const build = await loadBuild();
-    return createRequestHandler({
-      build,
-      getLoadContext() {
-        return {}; // add any context you need here
-      },
-    })(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
+// All other routes go to Remix
+app.all(
+  "*",
+  createRequestHandler({
+    build,
+    getLoadContext() {
+      return {}; // add any context you need
+    },
+  })
+);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
