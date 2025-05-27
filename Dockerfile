@@ -36,7 +36,7 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/public ./public
 
 # Copy server and package.json for start
-COPY --from=builder /app/server.cjs ./server.cjs
+COPY --from=builder /app/server.js ./server.js
 COPY --from=builder /app/package.json ./package.json
 
 # Bind to the EB port
